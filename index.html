@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>JLPT 단어장</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="JLPT 단어장">
+  <meta name="theme-color" content="#c9a84c">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ── HEADER ─────────────────────────────────────────────────────────── -->
+<header>
+  <div class="logo">
+    JLPT <span id="level-badge">N5</span> 단어장
+  </div>
+
+  <!-- 레벨 탭 -->
+  <div class="level-tabs">
+    <button class="level-tab active" data-level="n5">N5</button>
+    <button class="level-tab"        data-level="n3">N3</button>
+  </div>
+
+  <div class="header-right">
+    <!-- 통계 -->
+    <div class="stats-wrap">
+      <div class="stat-item"><div class="stat-dot dot-known"></div><span id="known-count">0</span> 암기</div>
+      <div class="stat-item"><div class="stat-dot dot-unknown"></div><span id="unknown-count">0</span> 미암기</div>
+      <div class="stat-item"><div class="stat-dot dot-total"></div><span id="total-count">0</span> 전체</div>
+    </div>
+
+    <!-- 진행률 -->
+    <div class="progress-wrap">
+      <div class="overall-bar"><div class="overall-fill" id="overall-fill" style="width:0%"></div></div>
+      <span id="overall-pct">0%</span>
+    </div>
+
+    <!-- 글씨 크기 -->
+    <div class="fs-ctrl">
+      <span class="fs-label">글씨</span>
+      <button class="fs-btn" id="fs-down">－</button>
+      <span class="fs-val" id="fs-display">18</span>
+      <button class="fs-btn" id="fs-up">＋</button>
+    </div>
+
+    <!-- 모드 -->
+    <button class="mode-btn active" id="btn-list">📋 목록</button>
+    <button class="mode-btn"        id="btn-flash">🃏 플래시카드</button>
+
+    <!-- 테마 -->
+    <button class="theme-toggle" id="theme-toggle" title="다크/라이트">🌙</button>
+  </div>
+</header>
+
+<!-- ── TOOLBAR (목록 전용) ──────────────────────────────────────────────── -->
+<div id="toolbar">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" type="search" id="search-input" placeholder="한자, 읽기, 의미 검색...">
+  </div>
+
+  <div class="filter-btns">
+    <button class="filter-btn active" data-filter="all">전체</button>
+    <button class="filter-btn" data-filter="unknown">미암기</button>
+    <button class="filter-btn" data-filter="known">암기완료</button>
+    <button class="filter-btn" data-filter="noun">명사</button>
+    <button class="filter-btn" data-filter="verb">동사</button>
+    <button class="filter-btn" data-filter="adj">형용사</button>
+    <button class="filter-btn" data-filter="adv">부사</button>
+  </div>
+
+  <select class="sort-select" id="sort-select">
+    <option value="index">기본 순서</option>
+    <option value="alpha">가나다 순</option>
+    <option value="known">미암기 먼저</option>
+  </select>
+
+  <div class="vis-toggles">
+    <button class="vis-btn" id="toggle-reading-list">👁 히라가나</button>
+    <button class="vis-btn" id="toggle-meaning-list">👁 뜻</button>
+  </div>
+</div>
+
+<!-- ── MAIN ────────────────────────────────────────────────────────────── -->
+<main>
+
+  <!-- 목록 뷰 -->
+  <div id="list-view">
+    <div class="word-count" id="word-count"></div>
+    <div class="word-grid"  id="word-grid"></div>
+  </div>
+
+  <!-- 플래시카드 뷰 -->
+  <div id="flash-view">
+    <div class="flash-progress">
+      <div class="fc-progress-top">
+        <span id="fc-progress-text">0 / 0</span>
+        <div class="fc-top-btns">
+          <button class="fc-reading-btn" id="fc-reading-btn">👁 히라가나</button>
+          <button class="fc-shuffle-btn" id="fc-shuffle-btn">🔀 섞기</button>
+        </div>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="fc-progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="flashcard" id="flashcard">
+      <span class="fc-hint"    id="fc-hint">탭하여 정답 확인</span>
+      <div  class="fc-kanji"   id="fc-kanji"></div>
+      <div  class="fc-reading" id="fc-reading"></div>
+      <div  class="fc-type"    id="fc-type"></div>
+      <div  class="fc-meaning" id="fc-meaning"></div>
+      <div  class="fc-example" id="fc-example"></div>
+    </div>
+
+    <div class="fc-nav">
+      <button class="fc-nav-btn fc-unknown" id="fc-unknown-btn">✗ 모름</button>
+      <button class="fc-nav-btn fc-skip"    id="fc-skip-btn">→ 건너뜀</button>
+      <button class="fc-nav-btn fc-known"   id="fc-known-btn">✓ 암기</button>
+    </div>
+  </div>
+
+</main>
+
+<!-- ── 스크립트 ────────────────────────────────────────────────────────── -->
+<script src="js/data-n5.js"></script>
+<script src="js/data-n3.js"></script>
+<script src="js/state.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
