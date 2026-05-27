@@ -362,3 +362,15 @@ body.fc-hide-reading .fc-reading { visibility: hidden; }
 @media (max-width: 400px) {
   .fc-nav-btn { padding: 10px 6px; font-size: 0.78em; min-width: 80px; }
 }
+
+/* ── 오답 토스트 ─────────────────────────────────────────────────────────── */
+.review-toast {
+  font-size: 0.76em; color: var(--red);
+  padding: 4px 8px;
+  background: #2a1a1a;
+  border: 1px solid var(--red);
+  border-radius: 6px;
+  white-space: nowrap;
+}
+:root[data-theme="light"] .review-toast { background: #fae8e8; }
+

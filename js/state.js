@@ -21,6 +21,12 @@ const State = {
   fcIndex:    0,
   fcRevealed: false,
   fcList:     [],
+  fcPos: {
+    n5: localStorage.getItem('jlpt_fc_pos_n5') ? parseInt(localStorage.getItem('jlpt_fc_pos_n5')) : null,
+    n3: localStorage.getItem('jlpt_fc_pos_n3') ? parseInt(localStorage.getItem('jlpt_fc_pos_n3')) : null,
+  },
+
+  isReview: false, // 오답 노트 세션 여부
 
   // 표시 설정
   fontSize:        parseInt(localStorage.getItem('jlpt_fs') || '18'),
@@ -39,6 +45,9 @@ const State = {
   get unknownSet() {
     return this.unknown[this.level];
   },
+  get fcPosId() {
+    return this.fcPos[this.level];
+  },
 
   // 저장
   save() {
@@ -52,6 +61,10 @@ const State = {
     localStorage.setItem('jlpt_hide_meaning_list', this.hideMeaningList ? '1' : '0');
     localStorage.setItem('jlpt_hide_reading_fc',   this.hideReadingFc   ? '1' : '0');
     localStorage.setItem('jlpt_theme',           this.theme);
+    if (this.fcPos.n5 !== null) localStorage.setItem('jlpt_fc_pos_n5', this.fcPos.n5);
+    else localStorage.removeItem('jlpt_fc_pos_n5');
+    if (this.fcPos.n3 !== null) localStorage.setItem('jlpt_fc_pos_n3', this.fcPos.n3);
+    else localStorage.removeItem('jlpt_fc_pos_n3');
   },
 
   // 필터링된 단어 목록 반환

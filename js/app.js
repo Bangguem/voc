@@ -49,6 +49,7 @@ function updateStats() {
   const pct = total > 0 ? Math.round((known / total) * 100) : 0;
   document.getElementById('overall-pct').textContent = pct + '%';
   document.getElementById('overall-fill').style.width = pct + '%';
+  document.getElementById('review-count').textContent = State.unknownSet.size;
 }
 
 // ── 가시성 토글 ───────────────────────────────────────────────────────────
@@ -110,10 +111,17 @@ function markKnown(id)   { State.markKnown(id);   renderList(); updateStats(); }
 function markUnknown(id) { State.markUnknown(id);  renderList(); updateStats(); }
 
 // ── 플래시카드 ────────────────────────────────────────────────────────────
-function initFlash() {
-  State.fcList    = State.filtered();
-  State.fcIndex   = 0;
+function initFlash(list = null) {
+  State.isReview   = list !== null;
+  State.fcList     = list !== null ? list : State.filtered();
   State.fcRevealed = false;
+  const savedId = State.fcPosId;
+  if (savedId !== null) {
+    const idx = State.fcList.findIndex(w => w.id === savedId);
+    State.fcIndex = idx >= 0 ? idx : 0;
+  } else {
+    State.fcIndex = 0;
+  }
   renderFlash();
 }
 
@@ -150,7 +158,7 @@ function fcNext(mark) {
   const list = State.fcList;
   if (!list.length) return;
   const w = list[State.fcIndex];
-  if (mark === 'known')   State.markKnown(w.id);
+  if (mark === 'known' && !State.isReview) State.markKnown(w.id);
   if (mark === 'unknown') State.markUnknown(w.id);
   updateStats();
 
@@ -160,8 +168,12 @@ function fcNext(mark) {
     card.classList.remove('flip-anim');
     if (State.fcIndex < list.length - 1) {
       State.fcIndex++;
+      State.fcPos[State.level] = State.fcList[State.fcIndex].id;
+      State.save();
       renderFlash();
     } else {
+      State.fcPos[State.level] = null;
+      State.save();
       document.getElementById('fc-kanji').textContent   = '완료! 🎉';
       document.getElementById('fc-reading').textContent = '';
       document.getElementById('fc-type').textContent    = '';
@@ -174,16 +186,39 @@ function fcNext(mark) {
   }, 180);
 }
 
+// ── 오답 노트 ─────────────────────────────────────────────────────────────
+function showReview() {
+  if (State.unknownSet.size === 0) {
+    const t = document.getElementById('review-toast');
+    t.style.display = 'inline';
+    setTimeout(() => { t.style.display = 'none'; }, 2000);
+    return;
+  }
+  const reviewList = State.vocab.filter(w => State.unknownSet.has(w.id));
+  State.mode = 'flash';
+  updateModeUI('flash');
+  initFlash(reviewList);
+}
+
 // ── 모드 전환 ─────────────────────────────────────────────────────────────
+function updateModeUI(mode) {
+  const isList  = mode === 'list';
+  const isFlash = mode === 'flash';
+  document.getElementById('list-view').style.display  = isList  ? ''     : 'none';
+  document.getElementById('flash-view').style.display = isFlash ? 'flex' : 'none';
+  document.getElementById('toolbar').style.display    = isList  ? ''     : 'none';
+  document.getElementById('btn-list').classList.toggle('active',  isList);
+  document.getElementById('btn-flash').classList.toggle('active', isFlash);
+  document.getElementById('btn-review').classList.toggle('active',
+    isFlash && State.fcList.length > 0 &&
+    State.fcList.every(w => State.unknownSet.has(w.id))
+  );
+}
+
 function setMode(mode) {
   State.mode = mode;
-  const isList = mode === 'list';
-  document.getElementById('list-view').style.display   = isList ? '' : 'none';
-  document.getElementById('flash-view').style.display  = isList ? 'none' : 'flex';
-  document.getElementById('toolbar').style.display     = isList ? '' : 'none';
-  document.getElementById('btn-list').classList.toggle('active',  isList);
-  document.getElementById('btn-flash').classList.toggle('active', !isList);
-  if (!isList) initFlash();
+  updateModeUI(mode);
+  if (mode === 'flash') initFlash();
 }
 
 // ── 이벤트 바인딩 ─────────────────────────────────────────────────────────
@@ -216,8 +251,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // 모드 전환
-  document.getElementById('btn-list').addEventListener('click',  () => setMode('list'));
-  document.getElementById('btn-flash').addEventListener('click', () => setMode('flash'));
+  document.getElementById('btn-list').addEventListener('click',   () => setMode('list'));
+  document.getElementById('btn-flash').addEventListener('click',  () => setMode('flash'));
+  document.getElementById('btn-review').addEventListener('click', showReview);
 
   // 검색
   document.getElementById('search-input').addEventListener('input', e => {
