@@ -232,8 +232,8 @@ const Quiz = {
     document.getElementById('quiz-input').value         = '';
     document.getElementById('quiz-input-row').style.display = 'flex';
     document.getElementById('quiz-next').style.display  = 'none';
-    document.getElementById('quiz-progress-text').textContent = `${this.index + 1} / ${total}`;
-    document.getElementById('quiz-progress-fill').style.width = `${(this.index / total) * 100}%`;
+    document.getElementById('quiz-progress-text').textContent = total > 0 ? `${this.index + 1} / ${total}` : '0 / 0';
+    document.getElementById('quiz-progress-fill').style.width = total > 0 ? `${(this.index / total) * 100}%` : '0%';
     document.getElementById('quiz-score-text').textContent    = `정답 ${this.score}`;
     setTimeout(() => {
       const inp = document.getElementById('quiz-input');
@@ -328,18 +328,13 @@ function showReview() {
 
 // ── 모드 전환 ─────────────────────────────────────────────────────────────
 function updateModeUI(mode) {
-  const isList  = mode === 'list';
-  const isFlash = mode === 'flash';
-  const isQuiz  = mode === 'quiz';
-  document.getElementById('list-view').style.display  = isList  ? ''     : 'none';
-  document.getElementById('flash-view').style.display = isFlash ? 'flex' : 'none';
-  document.getElementById('quiz-view').style.display  = isQuiz  ? 'flex' : 'none';
-  document.getElementById('toolbar').style.display    = isList  ? ''     : 'none';
-  document.getElementById('btn-list').classList.toggle('active',  isList);
-  document.getElementById('btn-flash').classList.toggle('active', isFlash);
-  document.getElementById('btn-quiz').classList.toggle('active',  isQuiz);
+  document.querySelector('main').dataset.mode = mode;
+  document.getElementById('toolbar').style.display = mode === 'list' ? '' : 'none';
+  document.getElementById('btn-list').classList.toggle('active',  mode === 'list');
+  document.getElementById('btn-flash').classList.toggle('active', mode === 'flash');
+  document.getElementById('btn-quiz').classList.toggle('active',  mode === 'quiz');
   document.getElementById('btn-review').classList.toggle('active',
-    isFlash && State.fcList.length > 0 &&
+    mode === 'flash' && State.fcList.length > 0 &&
     State.fcList.every(w => State.unknownSet.has(w.id))
   );
 }
