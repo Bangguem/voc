@@ -206,7 +206,10 @@ const Quiz = {
 
   render() {
     const card = document.getElementById('quiz-card');
-    card.classList.remove('shake', 'glow');
+    card.classList.remove('shake', 'glow', 'hint-shown');
+    const hintBtn = document.getElementById('quiz-hint-btn');
+    hintBtn.classList.remove('active');
+    hintBtn.textContent = '💡 힌트';
     this.answered = false;
     const w = this.list[this.index];
     const total = this.list.length;
@@ -232,7 +235,11 @@ const Quiz = {
     document.getElementById('quiz-progress-text').textContent = `${this.index + 1} / ${total}`;
     document.getElementById('quiz-progress-fill').style.width = `${(this.index / total) * 100}%`;
     document.getElementById('quiz-score-text').textContent    = `정답 ${this.score}`;
-    setTimeout(() => document.getElementById('quiz-input').focus(), 30);
+    setTimeout(() => {
+      const inp = document.getElementById('quiz-input');
+      inp.focus();
+      inp.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 80);
   },
 
   submit() {
@@ -386,6 +393,13 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.getElementById('quiz-next').addEventListener('click', () => Quiz.next());
   document.getElementById('qr-restart').addEventListener('click', () => Quiz.init());
+  document.getElementById('quiz-hint-btn').addEventListener('click', () => {
+    const card = document.getElementById('quiz-card');
+    const btn  = document.getElementById('quiz-hint-btn');
+    const showing = card.classList.toggle('hint-shown');
+    btn.classList.toggle('active', showing);
+    btn.textContent = showing ? '🙈 힌트 숨기기' : '💡 힌트';
+  });
 
   // 검색
   document.getElementById('search-input').addEventListener('input', e => {

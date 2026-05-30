@@ -360,34 +360,57 @@ body.fc-hide-reading .fc-reading { visibility: hidden; }
   display: flex; flex-direction: column; align-items: center;
   justify-content: center; gap: 14px;
 }
+.quiz-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+
+/* 힌트 버튼 */
+.quiz-hint-btn {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 7px; color: var(--text-dim);
+  padding: 4px 13px; cursor: pointer; font-size: 0.84em; font-family: inherit;
+  touch-action: manipulation;
+}
+.quiz-hint-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+.quiz-hint-btn:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+
 .quiz-badge {
   font-size: calc(var(--fs) * 0.65); color: var(--text-muted);
   background: var(--surface2); border: 1px solid var(--border);
   border-radius: 4px; padding: 2px 7px;
+  display: none;
 }
 .quiz-kanji {
   font-family: 'Noto Serif JP', serif;
   font-size: calc(var(--fs) * 2.9); font-weight: 600;
   color: var(--text); letter-spacing: 0.05em; text-align: center; line-height: 1.2;
 }
-.quiz-meaning { font-size: calc(var(--fs) * 0.88); color: var(--text-dim); text-align: center; }
+.quiz-meaning {
+  font-size: calc(var(--fs) * 0.88); color: var(--text-dim); text-align: center;
+  display: none;
+}
+/* 힌트 표시 시 뱃지·뜻 노출 */
+.quiz-card.hint-shown .quiz-badge  { display: block; }
+.quiz-card.hint-shown .quiz-meaning { display: block; }
 
-.quiz-input-row { display: flex; gap: 8px; width: 100%; max-width: 360px; }
+.quiz-input-row { display: flex; gap: 8px; width: 100%; max-width: 380px; }
 .quiz-input {
   flex: 1; background: var(--surface2); border: 1.5px solid var(--accent);
-  border-radius: 8px; color: var(--text);
-  font-family: 'Noto Serif JP', serif; font-size: calc(var(--fs) * 1.05);
-  padding: 8px 12px; outline: none; text-align: center;
+  border-radius: 10px; color: var(--text);
+  font-family: 'Noto Serif JP', serif;
+  /* 16px 이상으로 고정 — iOS Safari 자동 확대 방지 */
+  font-size: max(16px, calc(var(--fs) * 1.05));
+  padding: 10px 14px; outline: none; text-align: center;
+  touch-action: manipulation;
 }
 .quiz-input::placeholder {
   color: var(--text-muted); font-family: 'Noto Sans KR', sans-serif; font-size: 0.72em;
 }
 .quiz-confirm {
-  background: var(--accent); border: none; border-radius: 8px; color: #000;
-  padding: 8px 16px; cursor: pointer; font-family: inherit; font-weight: 700;
-  font-size: 0.88em; white-space: nowrap;
+  background: var(--accent); border: none; border-radius: 10px; color: #000;
+  padding: 10px 18px; cursor: pointer; font-family: inherit; font-weight: 700;
+  font-size: 0.9em; white-space: nowrap; touch-action: manipulation;
+  min-width: 60px;
 }
-.quiz-confirm:hover { opacity: 0.85; }
+.quiz-confirm:active { opacity: 0.75; }
 
 .quiz-feedback {
   display: flex; flex-direction: column; align-items: center; gap: 5px; min-height: 52px;
@@ -418,9 +441,10 @@ body.fc-hide-reading .fc-reading { visibility: hidden; }
 .quiz-next {
   background: var(--surface); border: 1px solid var(--accent);
   border-radius: 10px; color: var(--accent);
-  padding: 11px 30px; cursor: pointer; font-family: inherit; font-size: 0.88em; font-weight: 600;
+  padding: 13px 34px; cursor: pointer; font-family: inherit; font-size: 0.9em; font-weight: 600;
+  touch-action: manipulation;
 }
-.quiz-next:hover { background: var(--accent); color: #000; }
+.quiz-next:active { background: var(--accent); color: #000; }
 
 .quiz-result {
   display: none; flex-direction: column; align-items: center; gap: 18px;
@@ -441,13 +465,18 @@ body.fc-hide-reading .fc-reading { visibility: hidden; }
 .wrong-correct { color: var(--green); }
 .qr-restart {
   background: var(--accent); border: none; border-radius: 10px; color: #000;
-  padding: 12px 36px; cursor: pointer; font-family: inherit; font-size: 0.9em; font-weight: 700;
+  padding: 13px 36px; cursor: pointer; font-family: inherit; font-size: 0.9em; font-weight: 700;
+  touch-action: manipulation;
 }
-.qr-restart:hover { opacity: 0.85; }
+.qr-restart:active { opacity: 0.75; }
 
 @media (max-width: 600px) {
+  #quiz-view { padding: 12px 12px; gap: 12px; justify-content: flex-start; padding-top: 16px; }
   .quiz-kanji { font-size: calc(var(--fs) * 2.1); }
-  .quiz-card  { min-height: 260px; padding: 24px 14px; }
+  .quiz-card  { min-height: 240px; padding: 22px 14px; gap: 12px; }
+  .quiz-input-row { max-width: 100%; }
+  .quiz-foot  { justify-content: stretch; }
+  .quiz-next  { flex: 1; text-align: center; padding: 14px; }
 }
 
 /* ── SCROLLBAR ──────────────────────────────────────────────────────────── */
