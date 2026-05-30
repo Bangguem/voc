@@ -186,6 +186,125 @@ function fcNext(mark) {
   }, 180);
 }
 
+// ── 시험 (Quiz) ────────────────────────────────────────────────────────────
+const Quiz = {
+  list: [], index: 0, score: 0, answered: false, wrong: [],
+
+  init() {
+    this.list = State.filtered().filter(w => w.kanji !== w.reading);
+    for (let i = this.list.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [this.list[i], this.list[j]] = [this.list[j], this.list[i]];
+    }
+    this.index = 0; this.score = 0; this.answered = false; this.wrong = [];
+    document.getElementById('quiz-result').style.display = 'none';
+    document.getElementById('quiz-top').style.display    = '';
+    document.getElementById('quiz-card').style.display   = 'flex';
+    document.getElementById('quiz-foot').style.display   = 'flex';
+    this.render();
+  },
+
+  render() {
+    const card = document.getElementById('quiz-card');
+    card.classList.remove('shake', 'glow');
+    this.answered = false;
+    const w = this.list[this.index];
+    const total = this.list.length;
+
+    if (!w) {
+      document.getElementById('quiz-kanji').textContent   = '시험할 단어 없음';
+      document.getElementById('quiz-meaning').textContent = '한자가 포함된 단어가 없습니다';
+      document.getElementById('quiz-badge').textContent   = '';
+      document.getElementById('quiz-input-row').style.display = 'none';
+      document.getElementById('quiz-next').style.display  = 'none';
+      return;
+    }
+
+    document.getElementById('quiz-badge').textContent   = typeLabel(w.type);
+    document.getElementById('quiz-kanji').textContent   = w.kanji;
+    document.getElementById('quiz-meaning').textContent = w.meaning;
+    document.getElementById('quiz-verdict').textContent = '';
+    document.getElementById('quiz-verdict').className   = 'quiz-verdict';
+    document.getElementById('quiz-answer').textContent  = '';
+    document.getElementById('quiz-input').value         = '';
+    document.getElementById('quiz-input-row').style.display = 'flex';
+    document.getElementById('quiz-next').style.display  = 'none';
+    document.getElementById('quiz-progress-text').textContent = `${this.index + 1} / ${total}`;
+    document.getElementById('quiz-progress-fill').style.width = `${(this.index / total) * 100}%`;
+    document.getElementById('quiz-score-text').textContent    = `정답 ${this.score}`;
+    setTimeout(() => document.getElementById('quiz-input').focus(), 30);
+  },
+
+  submit() {
+    if (this.answered || !this.list[this.index]) return;
+    const input = document.getElementById('quiz-input').value.trim();
+    if (!input) return;
+    this.answered = true;
+    const w = this.list[this.index];
+    const correct = input === w.reading;
+
+    if (correct) {
+      this.score++;
+    } else {
+      this.wrong.push({ word: w, given: input });
+      State.markUnknown(w.id);
+      updateStats();
+    }
+
+    const verdict = document.getElementById('quiz-verdict');
+    const card    = document.getElementById('quiz-card');
+    if (correct) {
+      verdict.textContent = '정답! ✓';
+      verdict.className   = 'quiz-verdict ok';
+      document.getElementById('quiz-answer').textContent = '';
+      card.classList.add('glow');
+    } else {
+      verdict.textContent  = '오답 ✗';
+      verdict.className    = 'quiz-verdict fail';
+      document.getElementById('quiz-answer').textContent = `정답: ${w.reading}`;
+      card.classList.add('shake');
+    }
+
+    document.getElementById('quiz-score-text').textContent   = `정답 ${this.score}`;
+    document.getElementById('quiz-input-row').style.display  = 'none';
+    document.getElementById('quiz-next').style.display       = '';
+  },
+
+  next() {
+    if (this.index < this.list.length - 1) {
+      this.index++;
+      this.render();
+    } else {
+      this.showResult();
+    }
+  },
+
+  showResult() {
+    const total = this.list.length;
+    const pct   = total > 0 ? Math.round((this.score / total) * 100) : 0;
+    document.getElementById('quiz-top').style.display  = 'none';
+    document.getElementById('quiz-card').style.display = 'none';
+    document.getElementById('quiz-foot').style.display = 'none';
+    const resultEl = document.getElementById('quiz-result');
+    resultEl.style.display = 'flex';
+    document.getElementById('qr-score').textContent = `${this.score} / ${total}  (${pct}%)`;
+    const wrongEl = document.getElementById('qr-wrong');
+    if (this.wrong.length === 0) {
+      wrongEl.innerHTML = '<div style="text-align:center;color:var(--green)">모두 정답! 🎉</div>';
+    } else {
+      wrongEl.innerHTML = this.wrong.map(({ word, given }) =>
+        `<div class="wrong-item">
+          <span class="wrong-kanji">${word.kanji}</span>
+          &nbsp;→&nbsp;
+          <span class="wrong-given">✗ ${given}</span>
+          &nbsp;/&nbsp;
+          <span class="wrong-correct">✓ ${word.reading}</span>
+        </div>`
+      ).join('');
+    }
+  },
+};
+
 // ── 오답 노트 ─────────────────────────────────────────────────────────────
 function showReview() {
   if (State.unknownSet.size === 0) {
@@ -204,11 +323,14 @@ function showReview() {
 function updateModeUI(mode) {
   const isList  = mode === 'list';
   const isFlash = mode === 'flash';
+  const isQuiz  = mode === 'quiz';
   document.getElementById('list-view').style.display  = isList  ? ''     : 'none';
   document.getElementById('flash-view').style.display = isFlash ? 'flex' : 'none';
+  document.getElementById('quiz-view').style.display  = isQuiz  ? 'flex' : 'none';
   document.getElementById('toolbar').style.display    = isList  ? ''     : 'none';
   document.getElementById('btn-list').classList.toggle('active',  isList);
   document.getElementById('btn-flash').classList.toggle('active', isFlash);
+  document.getElementById('btn-quiz').classList.toggle('active',  isQuiz);
   document.getElementById('btn-review').classList.toggle('active',
     isFlash && State.fcList.length > 0 &&
     State.fcList.every(w => State.unknownSet.has(w.id))
@@ -219,6 +341,7 @@ function setMode(mode) {
   State.mode = mode;
   updateModeUI(mode);
   if (mode === 'flash') initFlash();
+  if (mode === 'quiz')  Quiz.init();
 }
 
 // ── 이벤트 바인딩 ─────────────────────────────────────────────────────────
@@ -253,7 +376,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // 모드 전환
   document.getElementById('btn-list').addEventListener('click',   () => setMode('list'));
   document.getElementById('btn-flash').addEventListener('click',  () => setMode('flash'));
+  document.getElementById('btn-quiz').addEventListener('click',   () => setMode('quiz'));
   document.getElementById('btn-review').addEventListener('click', showReview);
+
+  // 시험 이벤트
+  document.getElementById('quiz-confirm').addEventListener('click', () => Quiz.submit());
+  document.getElementById('quiz-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') Quiz.answered ? Quiz.next() : Quiz.submit();
+  });
+  document.getElementById('quiz-next').addEventListener('click', () => Quiz.next());
+  document.getElementById('qr-restart').addEventListener('click', () => Quiz.init());
 
   // 검색
   document.getElementById('search-input').addEventListener('input', e => {

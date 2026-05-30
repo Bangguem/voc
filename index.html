@@ -54,6 +54,7 @@
     <!-- 모드 -->
     <button class="mode-btn active" id="btn-list">📋 목록</button>
     <button class="mode-btn"        id="btn-flash">🃏 플래시카드</button>
+    <button class="mode-btn"        id="btn-quiz">✏️ 시험</button>
     <button class="mode-btn"        id="btn-review">📝 오답 (<span id="review-count">0</span>)</button>
     <span class="review-toast" id="review-toast" style="display:none">오답 없음</span>
 
@@ -98,6 +99,49 @@
   <div id="list-view">
     <div class="word-count" id="word-count"></div>
     <div class="word-grid"  id="word-grid"></div>
+  </div>
+
+  <!-- 시험 뷰 -->
+  <div id="quiz-view">
+
+    <div class="quiz-top" id="quiz-top">
+      <div class="quiz-meta">
+        <span id="quiz-progress-text">1 / 0</span>
+        <span id="quiz-score-text">정답 0</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="quiz-progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="quiz-card" id="quiz-card">
+      <div class="quiz-badge" id="quiz-badge"></div>
+      <div class="quiz-kanji" id="quiz-kanji"></div>
+      <div class="quiz-meaning" id="quiz-meaning"></div>
+
+      <div class="quiz-input-row" id="quiz-input-row">
+        <input class="quiz-input" id="quiz-input" type="text"
+               placeholder="히라가나 입력..."
+               autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
+        <button class="quiz-confirm" id="quiz-confirm">확인</button>
+      </div>
+
+      <div class="quiz-feedback">
+        <span class="quiz-verdict" id="quiz-verdict"></span>
+        <span class="quiz-answer"  id="quiz-answer"></span>
+      </div>
+    </div>
+
+    <div class="quiz-foot" id="quiz-foot">
+      <button class="quiz-next" id="quiz-next" style="display:none">다음 →</button>
+    </div>
+
+    <div class="quiz-result" id="quiz-result">
+      <div class="qr-score"   id="qr-score"></div>
+      <div class="qr-wrong"   id="qr-wrong"></div>
+      <button class="qr-restart" id="qr-restart">다시 시험 🔁</button>
+    </div>
+
   </div>
 
   <!-- 플래시카드 뷰 -->
